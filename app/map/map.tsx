@@ -72,14 +72,20 @@ const nearbyCoordinates:Site[] = sites;
     return nearestDistance;
   };
 
-
+  interface NetworkInformation extends EventTarget {
+    readonly effectiveType: string;
+  }
+  
+  interface NavigatorWithConnection extends Navigator {
+    readonly connection?: NetworkInformation;
+  }
 
   //@ts-ignore
 function LocationMarker() {
   const [position, setPosition] = useState<LatLngTuple | null>(null);
   const [nerestDistance ,setNerestDistance]=useState<number>(0)
-  const [networkType, setNetworkType] = useState<string>('Unknown');
-  const [signalStrength, setSignalStrength] = useState<number | null>(null);
+
+
 
 const [flage ,setFlage] =useState(true)
  
@@ -101,8 +107,8 @@ console.log("abezakew"+nerestDistance )
 if(flage==true){
       Swal.fire({
         title: nerestDistance  == 0
-          ?  `5G network available in this area    Network Type: ${networkType} Signal Strength: ${signalStrength}` 
-          : `No 5G network coverage available in this area   Network Type: ${networkType} Signal Strength: ${signalStrength}`,
+          ?  `5G network available in this area ` 
+          : `No 5G network coverage available in this area`,
         icon: 'info',
         showConfirmButton: false,
         timer: 10000, // 10 seconds
@@ -124,17 +130,9 @@ if(flage==true){
 
 
   useEffect(() => {
-    if ('connection' in navigator) {
-      const network = (navigator as any).connection.effectiveType;
-      setNetworkType(network);
-    }
-
-    if ('getSignalStrength' in navigator) {
-      (navigator as any).getSignalStrength().then((signal: number) => {
-        setSignalStrength(signal);
-      });
-    }
-
+  
+    const nav: NavigatorWithConnection = navigator as NavigatorWithConnection;
+   
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
